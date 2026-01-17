@@ -68,7 +68,7 @@ variable "kepler" {
 variable "scaphandre" {
   description = "Scaphandre module configuration"
   type = object({
-    enabled       = optional(bool, false)
+    enabled       = optional(bool, true)
     release_name  = optional(string, "scaphandre")
     namespace     = optional(string, "scaphandre")
     chart_version = optional(string, "")
@@ -81,7 +81,7 @@ variable "scaphandre" {
 variable "kubegreen" {
   description = "KubeGreen module configuration"
   type = object({
-    enabled       = optional(bool, false)
+    enabled       = optional(bool, true)
     release_name  = optional(string, "kube-green")
     namespace     = optional(string, "kube-green")
     chart_version = optional(string, "")

@@ -13,7 +13,7 @@ The GreenOps Module provides a unified way to deploy and manage:
 - **Scaphandre** - Container-level power consumption monitoring
 - **KubeGreen** - Automated resource cleanup and pod hibernation for cost optimization
 
-All components are optional and can be selectively deployed based on your requirements.
+All components are **enabled by default** and can be selectively disabled based on your requirements.
 
 ## Features
 
@@ -33,30 +33,42 @@ All components are optional and can be selectively deployed based on your requir
 
 ## Quick Start
 
-### Basic Deployment
+### Basic Deployment (All Components)
 
 ```hcl
-module "greenops" {
-  source = "https://github.com/fabiocicerchia/kepler-module.git?ref=main"
+# Deploy all components with defaults
+terraform init
+terraform apply
+```
 
-  kubeconfig_path = "~/.kube/config"
+All six components (Prometheus, KEDA, OpenCost, Kepler, Scaphandre, and KubeGreen) are enabled by default.
 
-  # All components enabled by default
-  prometheus = {
-    enabled = true
-  }
+### Custom Deployment
 
-  keda = {
-    enabled = true
-  }
+```hcl
+# terraform.tfvars - Disable specific components
+prometheus = {
+  enabled = true
+}
 
-  opencost = {
-    enabled = true
-  }
+keda = {
+  enabled = true
+}
 
-  kepler = {
-    enabled = true
-  }
+opencost = {
+  enabled = false  # Disable OpenCost
+}
+
+kepler = {
+  enabled = true
+}
+
+scaphandre = {
+  enabled = true
+}
+
+kubegreen = {
+  enabled = false  # Disable KubeGreen
 }
 ```
 
@@ -138,21 +150,41 @@ kepler = {
   namespace           = string  # Kubernetes namespace (default: "kepler-operator")
   values              = object  # Helm chart values
   deploy_powermonitor = bool    # Deploy Kepler power monitor (default: true)
+  chart_version       = string  # Helm chart version (default: "" for latest)
 }
 ```
 
-### Selective Deployment
-
-Deploy only specific components:
-
-```bash
-terraform apply -var='prometheus={enabled=true}' \
-                 -var='keda={enabled=false}' \
-                 -var='opencost={enabled=true}' \
-                 -var='kepler={enabled=false}'
+#### Scaphandre Configuration
+```hcl
+scaphandre = {
+  enabled       = bool      # Enable Scaphandre (default: true)
+  release_name  = string    # Helm release name (default: "scaphandre")
+  namespace     = string    # Kubernetes namespace (default: "scaphandre")
+  values        = object    # Helm chart values
+  chart_version = string    # Helm chart version (default: "" for latest)
+}
 ```
 
-Or use `terraform.tfvars`:
+#### KubeGreen Configuration
+```hcl
+kubegreen = {
+  enabled       = bool      # Enable KubeGreen (default: true)
+  release_name  = string    # Helm release name (default: "kube-green")
+  namespace     = string    # Kubernetes namespace (default: "kube-green")
+  values        = object    # Helm chart values
+  chart_version = string    # Helm chart version (default: "" for latest)
+}
+```
+
+#### Chart Version Management
+All modules support `chart_version` parameter:
+- **Empty string (`""`)** - Deploy with the latest available Helm chart version (default)
+- **Specific version** - Pin to an exact version (e.g., `"50.0.0"`)
+- **Configurable at all levels** - Set globally in `terraform.tfvars` or per-module
+
+### Selective Deployment
+
+Disable specific components using `terraform.tfvars`:
 
 ```hcl
 prometheus = {
@@ -160,7 +192,7 @@ prometheus = {
 }
 
 keda = {
-  enabled = false
+  enabled = false  # Disable KEDA
 }
 
 opencost = {
@@ -168,8 +200,24 @@ opencost = {
 }
 
 kepler = {
-  enabled = false
+  enabled = true
 }
+
+scaphandre = {
+  enabled = false  # Disable Scaphandre
+}
+
+kubegreen = {
+  enabled = false  # Disable KubeGreen
+}
+```
+
+Or via command line:
+
+```bash
+terraform apply -var='keda={enabled=false}' \
+                 -var='scaphandre={enabled=false}' \
+                 -var='kubegreen={enabled=false}'
 ```
 
 ## Outputs

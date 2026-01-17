@@ -78,7 +78,7 @@ variable "scaphandre" {
     values        = optional(any, {})
   })
   default = {
-    enabled = false
+    enabled = true
   }
 }
 
@@ -93,6 +93,6 @@ variable "kubegreen" {
     values        = optional(any, {})
   })
   default = {
-    enabled = false
+    enabled = true
   }
 }

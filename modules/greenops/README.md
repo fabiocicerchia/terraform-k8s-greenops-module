@@ -35,22 +35,25 @@ module "greenops" {
   source = "https://github.com/fabiocicerchia/kepler-module.git?ref=main"
 
   kubeconfig_path = "~/.kube/config"
-  deploy_demo_app = true
 }
 ```
 
-### Deploy Specific Components
+All six components (Prometheus, KEDA, OpenCost, Kepler, Scaphandre, and KubeGreen) are **enabled by default**.
+
+### Disable Specific Components
 
 ```hcl
 module "greenops" {
   source = "https://github.com/fabiocicerchia/kepler-module.git?ref=main"
+
+  kubeconfig_path = "~/.kube/config"
 
   prometheus = {
     enabled = true
   }
 
   keda = {
-    enabled = false
+    enabled = false  # Disable KEDA
   }
 
   opencost = {
@@ -58,6 +61,14 @@ module "greenops" {
   }
 
   kepler = {
+    enabled = true
+  }
+
+  scaphandre = {
+    enabled = false  # Disable Scaphandre
+  }
+
+  kubegreen = {
     enabled = true
   }
 }
@@ -119,6 +130,8 @@ module "greenops" {
 | keda | KEDA module configuration | `object({...})` | `{ enabled = true, ... }` | no |
 | opencost | OpenCost module configuration | `object({...})` | `{ enabled = true, ... }` | no |
 | kepler | Kepler module configuration | `object({...})` | `{ enabled = true, ... }` | no |
+| scaphandre | Scaphandre module configuration | `object({...})` | `{ enabled = true, ... }` | no |
+| kubegreen | KubeGreen module configuration | `object({...})` | `{ enabled = true, ... }` | no |
 
 ### Detailed Input Schema
 
@@ -166,20 +179,41 @@ kepler = {
 ```
 
 #### scaphandre
-```hcl
-scaphandre = {
-  enabled      = bool                    # Enable Scaphandre (default: false)
-  release_name = string                  # Helm release name (default: "scaphandre")
-  namespace    = string                  # Kubernetes namespace (default: "scaphandre")
-  values       = any                     # Helm chart values (default: {})
+```hcl = bool                    # Enable Scaphandre (default: true)
+  release_name  = string                  # Helm release name (default: "scaphandre")
+  namespace     = string                  # Kubernetes namespace (default: "scaphandre")
+  values        = any                     # Helm chart values (default: {})
+  chart_version = string                  # Helm chart version (default: "" for latest)
 }
 ```
 
 #### kubegreen
 ```hcl
 kubegreen = {
-  enabled      = bool                    # Enable KubeGreen (default: false)
-  release_name = string                  # Helm release name (default: "kube-green")
+  enabled       = bool                    # Enable KubeGreen (default: true)
+  release_name  = string                  # Helm release name (default: "kube-green")
+  namespace     = string                  # Kubernetes namespace (default: "kube-green")
+  values        = any                     # Helm chart values (default: {})
+  chart_version = string                  # Helm chart version (default: "" for latest)
+}
+```
+
+#### Chart Version Management
+
+All modules support `chart_version` parameter:
+- **Empty string (`""`)** - Deploy with the latest available Helm chart version (default)
+- **Specific version** - Pin to an exact version (e.g., `"50.0.0"`)
+
+Example:
+```hcl
+prometheus = {
+  enabled       = true
+  chart_version = "55.0.0"  # Pin to specific version
+}
+
+keda = {
+  enabled       = true
+  chart_version = ""        # Use latest (defaultube-green")
   namespace    = string                  # Kubernetes namespace (default: "kube-green")
   values       = any                     # Helm chart values (default: {})
 }

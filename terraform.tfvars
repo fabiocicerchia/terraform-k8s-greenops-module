@@ -64,7 +64,7 @@ kepler = {
 }
 
 scaphandre = {
-  enabled       = false
+  enabled       = true
   release_name  = "scaphandre"
   chart_version = ""
   namespace     = "scaphandre"
@@ -73,7 +73,7 @@ scaphandre = {
 }
 
 kubegreen = {
-  enabled       = false
+  enabled       = true
   chart_version = ""
   release_name  = "kube-green"
   namespace     = "kube-green"
