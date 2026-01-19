@@ -1,9 +1,3 @@
-variable "kubeconfig_path" {
-  description = "Path to the kubeconfig file"
-  type        = string
-  default     = "~/.kube/config"
-}
-
 # Prometheus configuration
 variable "prometheus" {
   description = "Prometheus module configuration"

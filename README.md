@@ -104,7 +104,6 @@ Import these community dashboards for visualization:
 - [Kepler Prometheus Dashboard](https://raw.githubusercontent.com/sustainable-computing-io/kepler-operator/main/hack/dashboard/assets/prometheus/dashboard.json)
 - [Ariewald Kepler Dashboard](https://raw.githubusercontent.com/ariewald/kepler-grafana-dashboard/refs/heads/main/kepler.json)
 - [Energy K8s Experiments Dashboard](https://raw.githubusercontent.com/bernardodon/energy-k8s-experiments/refs/heads/main/grafana-setup.json)
-- [OpenCost Dashboards](https://github.com/opencost/opencost/tree/develop/dashboard)
 
 ## Contributing
 

@@ -70,7 +70,8 @@ terraform apply -var='keda={enabled=false}' \
 ### Start Minikube
 
 ```bash
-minikube start --kubernetes-version=v1.32.0
+minikube start --kubernetes-version=v1.34.0
+minikube addons enable metrics-server
 kubectl config use-context minikube && kubectl config current-context
 ```
 
@@ -86,15 +87,15 @@ terraform apply
 Get Grafana admin password:
 
 ```bash
-kubectl --namespace monitoring get secrets prometheus-grafana \
+kubectl --namespace monitoring get secrets prometheus-community-grafana \
   -o jsonpath="{.data.admin-password}" | base64 -d ; echo
 ```
 
 Port forward services:
 
 ```bash
-kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80 & \
-kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-prometheus 9090:9090 & \
+kubectl port-forward -n monitoring svc/prometheus-community-grafana 3000:80
+kubectl port-forward -n monitoring svc/prometheus-community-kube-prometheus 9090:9090
 kubectl port-forward -n opencost svc/opencost 9090
 ```
 

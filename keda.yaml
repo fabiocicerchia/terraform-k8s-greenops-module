@@ -16,7 +16,7 @@ spec:
   triggers:
   - type: prometheus
     metadata:
-      serverAddress: http://prometheus-kube-prometheus-prometheus.monitoring:9090
+      serverAddress: http://prometheus-community-kube-prometheus.monitoring:9090
       metricName: kepler_container_watts
       query: |
         sum(

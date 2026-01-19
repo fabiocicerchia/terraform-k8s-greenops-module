@@ -33,8 +33,6 @@ Comprehensive Terraform module for deploying a complete green operations monitor
 ```hcl
 module "greenops" {
   source = "https://github.com/fabiocicerchia/terraform-kubernetes-greenops.git?ref=main"
-
-  kubeconfig_path = "~/.kube/config"
 }
 ```
 
@@ -45,8 +43,6 @@ All six components (Prometheus, KEDA, OpenCost, Kepler, Scaphandre, and KubeGree
 ```hcl
 module "greenops" {
   source = "https://github.com/fabiocicerchia/terraform-kubernetes-greenops.git?ref=main"
-
-  kubeconfig_path = "~/.kube/config"
 
   prometheus = {
     enabled = true
@@ -79,8 +75,6 @@ module "greenops" {
 ```hcl
 module "greenops" {
   source = "https://github.com/fabiocicerchia/terraform-kubernetes-greenops.git?ref=main"
-
-  kubeconfig_path = "~/.kube/config"
 
   prometheus = {
     enabled      = true
@@ -125,7 +119,6 @@ module "greenops" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| kubeconfig_path | Path to the kubeconfig file | `string` | `"~/.kube/config"` | no |
 | prometheus | Prometheus module configuration | `object({...})` | `{ enabled = true, ... }` | no |
 | keda | KEDA module configuration | `object({...})` | `{ enabled = true, ... }` | no |
 | opencost | OpenCost module configuration | `object({...})` | `{ enabled = true, ... }` | no |
@@ -437,7 +430,7 @@ kubectl logs -n kube-green -l app.kubernetes.io/name=kube-green --tail=100
 
 ```bash
 # Prometheus
-kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-prometheus 9090:9090
+kubectl port-forward -n monitoring svc/prometheus-community-kube-prometheus 9090:9090
 
 # Grafana (part of Prometheus)
 kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80

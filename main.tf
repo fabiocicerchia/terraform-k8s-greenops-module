@@ -1,7 +1,9 @@
 module "greenops" {
   source = "./modules/greenops"
 
-  kubeconfig_path = var.kubeconfig_path
+  providers = {
+    helm = helm
+  }
 
   prometheus = {
     enabled       = var.prometheus.enabled
@@ -52,6 +54,14 @@ module "greenops" {
     namespace     = var.kubegreen.namespace
     values        = var.kubegreen.values
     chart_version = var.kubegreen.chart_version
+  }
+
+  depends_on = [null_resource.deploy_cert_manager]
+}
+
+resource "null_resource" "deploy_cert_manager" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml"
   }
 }
 

@@ -39,7 +39,7 @@ opencost = {
       }
       prometheus = {
         internal = {
-          serviceName   = "prometheus-kube-prometheus-prometheus"
+          serviceName   = "prometheus-community-kube-prometheus"
           port          = 9090
           namespaceName = "monitoring"
         }

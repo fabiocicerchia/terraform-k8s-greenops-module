@@ -121,7 +121,7 @@ kubectl describe pvc -n monitoring <pvc-name>
 
 ```bash
 # Port-forward to Prometheus
-kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-prometheus 9090:9090
+kubectl port-forward -n monitoring svc/prometheus-community-kube-prometheus 9090:9090
 
 # Check Prometheus logs
 kubectl logs -n monitoring -l app.kubernetes.io/name=prometheus
@@ -301,7 +301,7 @@ kubectl get events -A --sort-by='.lastTimestamp' | grep Error
 
 ```bash
 # Port forward Prometheus
-kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-prometheus 9090:9090
+kubectl port-forward -n monitoring svc/prometheus-community-kube-prometheus 9090:9090
 
 # Visit http://localhost:9090 and check:
 # - Status > Targets (see scrape jobs)

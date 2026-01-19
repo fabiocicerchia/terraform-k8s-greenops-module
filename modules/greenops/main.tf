@@ -2,7 +2,10 @@ module "prometheus" {
   count  = var.prometheus.enabled ? 1 : 0
   source = "https://github.com/fabiocicerchia/terraform-helm-prometheus-stack/?ref=main"
 
-  kubeconfig_path = var.kubeconfig_path
+  providers = {
+    helm = helm
+  }
+
   release_name    = var.prometheus.release_name
   namespace       = var.prometheus.namespace
   values          = var.prometheus.values
@@ -13,7 +16,10 @@ module "keda" {
   count  = var.keda.enabled ? 1 : 0
   source = "https://github.com/fabiocicerchia/terraform-helm-keda/?ref=main"
 
-  kubeconfig_path = var.kubeconfig_path
+  providers = {
+    helm = helm
+  }
+
   release_name    = var.keda.release_name
   namespace       = var.keda.namespace
   values          = var.keda.values
@@ -26,7 +32,10 @@ module "opencost" {
   count  = var.opencost.enabled ? 1 : 0
   source = "https://github.com/fabiocicerchia/terraform-helm-opencost/?ref=main"
 
-  kubeconfig_path = var.kubeconfig_path
+  providers = {
+    helm = helm
+  }
+
   release_name    = var.opencost.release_name
   namespace       = var.opencost.namespace
   chart_version   = var.opencost.chart_version
@@ -37,7 +46,10 @@ module "kepler" {
   count  = var.kepler.enabled ? 1 : 0
   source = "https://github.com/fabiocicerchia/terraform-helm-kepler/?ref=main"
 
-  kubeconfig_path     = var.kubeconfig_path
+  providers = {
+    helm = helm
+  }
+
   release_name        = var.kepler.release_name
   namespace           = var.kepler.namespace
   values              = var.kepler.values
@@ -49,7 +61,10 @@ module "scaphandre" {
   count  = var.scaphandre.enabled ? 1 : 0
   source = "https://github.com/fabiocicerchia/terraform-helm-scaphandre/?ref=main"
 
-  kubeconfig_path = var.kubeconfig_path
+  providers = {
+    helm = helm
+  }
+
   release_name    = var.scaphandre.release_name
   namespace       = var.scaphandre.namespace
   chart_version   = var.scaphandre.chart_version
@@ -60,7 +75,10 @@ module "kubegreen" {
   count  = var.kubegreen.enabled ? 1 : 0
   source = "https://github.com/fabiocicerchia/terraform-helm-kubegreen/?ref=main"
 
-  kubeconfig_path = var.kubeconfig_path
+  providers = {
+    helm = helm
+  }
+
   release_name    = var.kubegreen.release_name
   chart_version   = var.kubegreen.chart_version
   namespace       = var.kubegreen.namespace

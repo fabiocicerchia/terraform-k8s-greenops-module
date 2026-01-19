@@ -5,7 +5,6 @@
 ### Global Settings
 
 - `kubeconfig_path` (string) - Path to kubeconfig file (default: `~/.kube/config`)
-- `git_ref` (string) - Git reference for module sources (default: `"main"`)
 
 ### Prometheus Configuration
 ```hcl

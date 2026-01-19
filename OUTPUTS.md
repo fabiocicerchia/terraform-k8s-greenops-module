@@ -155,7 +155,7 @@ resource "kubernetes_config_map" "app_config" {
   }
 
   data = {
-    prometheus_url = "http://prometheus-kube-prometheus-prometheus.${module.greenops.prometheus.namespace}.svc.cluster.local:9090"
+    prometheus_url = "http://prometheus-community-kube-prometheus.${module.greenops.prometheus.namespace}.svc.cluster.local:9090"
   }
 }
 ```
