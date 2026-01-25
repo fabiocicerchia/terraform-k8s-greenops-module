@@ -85,7 +85,7 @@ variable "carbon_intensity_exporter" {
   type = object({
     enabled       = bool
     release_name  = optional(string, "carbon-intensity-exporter")
-    namespace     = optional(string, "kube-system")
+    namespace     = optional(string, "carbon-intensity-exporter")
     chart_version = optional(string, "")
     values        = optional(any, {})
   })

@@ -1,3 +1,24 @@
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.0"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.0"
+    }
+  }
+}
+
+provider "helm" {
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+}
+
 module "greenops" {
   source = "../"
 
@@ -6,70 +27,107 @@ module "greenops" {
   }
 
   prometheus = {
-    enabled       = var.prometheus.enabled
-    release_name  = var.prometheus.release_name
-    namespace     = var.prometheus.namespace
-    values        = var.prometheus.values
-    chart_version = var.prometheus.chart_version
+    enabled       = true
+    release_name  = "prometheus-community"
+    namespace     = "monitoring"
+    chart_version = ""
+    # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
+    values = {
+      prometheus = {
+        prometheusSpec = {
+          serviceMonitorSelectorNilUsesHelmValues = false
+        }
+      }
+    }
   }
 
   keda = {
-    enabled        = var.keda.enabled
-    release_name   = var.keda.release_name
-    namespace      = var.keda.namespace
+    enabled        = true
+    release_name   = "kedacore"
+    namespace      = "keda"
+    chart_version  = ""
+    deploy_example = true
+    manifest_path  = "keda.yaml"
+    # https://github.com/kedacore/charts/blob/main/keda/values.yaml
     values         = {}
-    deploy_example = var.keda.deploy_example
-    manifest_path  = var.keda.manifest_path
-    chart_version  = var.keda.chart_version
   }
 
   opencost = {
-    enabled       = var.opencost.enabled
-    release_name  = var.opencost.release_name
-    namespace     = var.opencost.namespace
-    values        = var.opencost.values
-    chart_version = var.opencost.chart_version
+    enabled       = true
+    release_name  = "opencost-charts"
+    chart_version = ""
+    namespace     = "opencost"
+    # https://github.com/opencost/opencost-helm-chart/blob/main/charts/opencost/values.yaml
+    values = {
+      opencost = {
+        carbonCost = {
+          enabled = true
+        }
+        prometheus = {
+          internal = {
+            serviceName   = "prometheus-community-kube-prometheus"
+            port          = 9090
+            namespaceName = "monitoring"
+          }
+        }
+      }
+    }
   }
 
   kepler = {
-    enabled             = var.kepler.enabled
-    release_name        = var.kepler.release_name
-    namespace           = var.kepler.namespace
-    values              = var.kepler.values
-    deploy_powermonitor = var.kepler.deploy_powermonitor
-    chart_version       = var.kepler.chart_version
+    enabled             = true
+    release_name        = "kepler-operator"
+    chart_version       = ""
+    namespace           = "kepler-operator"
+    deploy_powermonitor = true
+    # https://github.com/sustainable-computing-io/kepler/blob/main/manifests/helm/kepler/values.yaml
+    # https://github.com/sustainable-computing-io/kepler/blob/main/docs/user/configuration.md
+    values = {
+      serviceMonitor = {
+        enabled = true
+      }
+    }
   }
 
   scaphandre = {
-    enabled       = var.scaphandre.enabled
-    release_name  = var.scaphandre.release_name
-    namespace     = var.scaphandre.namespace
-    values        = var.scaphandre.values
-    chart_version = var.scaphandre.chart_version
+    enabled       = true
+    release_name  = "scaphandre"
+    chart_version = ""
+    namespace     = "scaphandre"
+    # https://github.com/hubblo-org/scaphandre/blob/main/helm/scaphandre/values.yaml
+    values        = {
+      serviceMonitor = {
+        enabled = true
+      }
+    }
   }
 
   kubegreen = {
-    enabled       = var.kubegreen.enabled
-    release_name  = var.kubegreen.release_name
-    namespace     = var.kubegreen.namespace
-    values        = var.kubegreen.values
-    chart_version = var.kubegreen.chart_version
+    enabled       = true
+    chart_version = ""
+    release_name  = "kube-green"
+    namespace     = "kube-green"
+    # https://github.com/kube-green/kube-green
+    # https://kube-green.github.io/
+    values        = {}
   }
 
   carbon_intensity_exporter = {
-    enabled       = var.carbon_intensity_exporter.enabled
-    release_name  = var.carbon_intensity_exporter.release_name
-    namespace     = var.carbon_intensity_exporter.namespace
-    values        = var.carbon_intensity_exporter.values
-    chart_version = var.carbon_intensity_exporter.chart_version
+    enabled       = true
+    chart_version = ""
+    release_name  = "carbon-intensity-exporter"
+    namespace     = "carbon-intensity-exporter"
+    # https://github.com/Azure/kubernetes-carbon-intensity-exporter
+    values        = {}
   }
 
   cloud_carbon_footprint = {
-    enabled       = var.cloud_carbon_footprint.enabled
-    release_name  = var.cloud_carbon_footprint.release_name
-    namespace     = var.cloud_carbon_footprint.namespace
-    values        = var.cloud_carbon_footprint.values
-    chart_version = var.cloud_carbon_footprint.chart_version
+    enabled       = true
+    chart_version = ""
+    release_name  = "cloud-carbon-footprint"
+    namespace     = "cloud-carbon-footprint"
+    # https://github.com/cloud-carbon-footprint/cloud-carbon-footprint
+    values        = {}
   }
 
   depends_on = [null_resource.deploy_cert_manager]
@@ -82,8 +140,6 @@ resource "null_resource" "deploy_cert_manager" {
 }
 
 resource "null_resource" "deploy_demo_app" {
-  count = var.deploy_demo_app ? 1 : 0
-
   provisioner "local-exec" {
     command = "kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/refs/heads/main/release/kubernetes-manifests.yaml"
   }
