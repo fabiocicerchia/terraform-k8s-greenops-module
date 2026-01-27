@@ -1,0 +1,34 @@
+# Example KubeGreen SleepInfo Configuration
+# 
+# This resource defines when pods should be suspended (sleep) and resumed (wake up).
+# Apply this AFTER deploying the GreenOps module with KubeGreen enabled.
+#
+# Usage: kubectl apply -f kubegreen-sleepinfo.yaml
+
+---
+apiVersion: kube-green.com/v1alpha1
+kind: SleepInfo
+metadata:
+  name: dev-environment-sleep
+  namespace: development
+spec:
+  # Suspend deployments at 8 PM
+  sleepAt: "20:00"
+  
+  # Resume deployments at 8 AM
+  wakeUpAt: "08:00"
+  
+  # Only on weekdays (Monday=1 to Friday=5)
+  weekdays: "1-5"
+  
+  # Timezone for the schedule
+  timeZone: "UTC"
+  
+  # Exclude critical services from suspension
+  excludeRef:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: critical-api
+    - apiVersion: apps/v1
+      kind: StatefulSet
+      name: database

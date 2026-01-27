@@ -14,6 +14,14 @@ output "observability" {
   }
 }
 
+output "kubectl_config" {
+  description = "Kubectl configuration used for deployment"
+  value = {
+    config_path = var.kubectl_config_path
+    context     = coalesce(var.kubectl_context, "current")
+  }
+}
+
 output "cost_efficiency" {
   description = "Cost and resource efficiency outputs"
   value = {
@@ -68,9 +76,8 @@ output "carbon_emissions" {
       api_service_url    = module.cloud_carbon_footprint[0].api_service_url
     } : null
     codecarbon = var.carbon_emissions.codecarbon.enabled ? {
-      namespace    = module.codecarbon[0].namespace
-      release_name = module.codecarbon[0].release_name
-      version      = module.codecarbon[0].chart_version
+      namespace      = module.codecarbon[0].namespace
+      daemonset_name = module.codecarbon[0].daemonset_name
     } : null
   }
 }
@@ -90,7 +97,7 @@ output "deployed_components" {
       scaphandre = var.energy_power.scaphandre.enabled
     }
     sustainability_optimisation = {
-      kubegreen          = var.sustainability_optimisation.kubegreen.enabled
+      kubegreen = var.sustainability_optimisation.kubegreen.enabled
     }
     carbon_emissions = {
       carbon_intensity_exporter = var.carbon_emissions.carbon_intensity_exporter.enabled

@@ -1,6 +1,42 @@
 # 🌱 Terraform Module for GreenOps
 
-Comprehensive Terraform module for deploying a complete green operations monitoring stack on Kubernetes. Includes Prometheus, KEDA, OpenCost, Kepler Operator, Scaphandre, KubeGreen, Carbon Intensity Exporter, Cloud Carbon Footprint, and CodeCarbon with individual toggles for selective component deployment.
+**Start measuring your infrastructure's energy consumption and cost in 5 minutes.** This Terraform module deploys a complete green operations observability stack on Kubernetes, helping you make data-driven decisions about sustainability and efficiency.
+
+> **Observability First**: This module now defaults to **observability-only mode** — giving you actionable data without any automated changes to your workloads. Enable optimization features when you're ready.
+
+## ⚡ Quick Start (5 Minutes)
+
+**You can't optimize what you don't measure.** Most engineering teams lack visibility into:
+- How much energy their applications consume
+- Which workloads are the most expensive
+- Where to focus optimization efforts for maximum impact
+
+This module gives you **actionable observability** — the foundation for all GreenOps initiatives.
+
+**Prerequisites**: Kubernetes cluster with cert-manager installed ([install here](https://cert-manager.io/docs/installation/))
+
+```hcl
+# Get visibility into energy and cost - no automation, just data
+module "greenops" {
+  source = "fabiocicerchia/greenops/kubernetes"
+}
+```
+
+```bash
+terraform init && terraform apply
+```
+
+**That's it!** You now have:
+- **Prometheus** monitoring stack with Grafana dashboards
+- **Kepler** measuring real-time energy consumption per pod
+- **OpenCost** tracking infrastructure costs
+- **CodeCarbon** tracking application-level carbon emissions
+
+Access your dashboards:
+```bash
+kubectl port-forward -n monitoring svc/prometheus-community-grafana 3000:80
+# Browse to http://localhost:3000 (admin / prom-operator)
+```
 
 ## Overview
 
@@ -21,7 +57,9 @@ The GreenOps Module provides a unified way to deploy and manage:
 - **Sustainability Optimisation & Automation**:
   - **KubeGreen** - Automated resource cleanup and pod hibernation for cost optimisation
 
-All components are **enabled by default** and can be selectively disabled based on your requirements.
+**Default Configuration (Observability):**
+- ✅ **Enabled**: Prometheus, Kepler, OpenCost, CodeCarbon (safe, read-only monitoring)
+- ❌ **Disabled**: KEDA, KubeGreen, Carbon Intensity Exporter, Cloud Carbon Footprint (require configuration or perform actions)
 
 ## Why This Matters
 
@@ -36,9 +74,10 @@ Efficient infrastructure is **cheaper, faster, and greener**.
 
 ## Easy to Adopt
 
+- ⚡ **5-Minute Start**: Default configuration deploys observability tools with zero configuration
 - 🚀 **Unified Deployment**: Manage 10+ sustainability tools with a single Terraform module, no "dependency hell."
 - 🎛️ **Simple Configuration**: Toggles for every component mean you can start small (e.g., just Prometheus + OpenCost) and expand later.
-- 🔄 **Standard Interfaces**: Built on top of Cloud Native standards (Prometheus, Grafana, Helm), integrating seamlessly with your existing stack.
+- 🔄 **Standard Interfaces**: Built on Cloud Native standards (Prometheus, Grafana, Helm)
 - 🛡️ **Non-Intrusive**: Most components run as sidecars, daemonsets, or operators without requiring changes to your application code.
 
 ## Environmental Impact in Practice
@@ -73,7 +112,7 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 ## Requirements
 
 | Name | Version |
-|------|---------|
+|------|---------|  
 | terraform | >= 1.0 or OpenTofu >= 1.6 |
 | helm | >= 2.0 |
 | null | >= 3.0 |
@@ -81,26 +120,78 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 - [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.0 or [OpenTofu](https://opentofu.org/docs/intro/install/)
 - [Kubernetes](https://kubernetes.io/) cluster (v1.24+)
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/) configured to access your cluster
-- [Helm](https://helm.sh/) (provider handles installation)
+- [cert-manager](https://cert-manager.io/) installed in your cluster (required for Kepler)
 
-### External Requirements
+### Usage
 
-- [kubectl](https://kubernetes.io/docs/tasks/tools/) - For interacting with your Kubernetes cluster
-- [Kubernetes cluster](https://kubernetes.io/docs/setup/) - A running Kubernetes cluster (v1.24+)
-
-## Usage
-
-### Deploy All Components (Default)
+Get immediate visibility with zero configuration:
 
 ```hcl
 module "greenops" {
   source = "fabiocicerchia/greenops/kubernetes"
+  # That's it! Defaults to observability-only mode
+  # Deploys: Prometheus, Kepler, OpenCost, CodeCarbon
 }
 ```
 
-All ten components are **enabled by default** and can be selectively disabled based on your requirements.
+#### Targeting a specific cluster
 
-### Disable Specific Components
+Set the kubectl context in your provider configuration or as a variable:
+
+```hcl
+# In your example file (e.g., tier1-observe-only.tf)
+variable "kubectl_context" {
+  description = "Kubectl context to use"
+  type        = string
+  default     = "minikube"  # Or any context from: kubectl config get-contexts
+}
+
+provider "helm" {
+  kubernetes {
+    config_path    = "~/.kube/config"
+    config_context = var.kubectl_context
+  }
+}
+
+provider "kubectl" {
+  config_path    = "~/.kube/config"
+  config_context = var.kubectl_context
+}
+
+module "greenops" {
+  source = "fabiocicerchia/greenops/kubernetes"
+  
+  providers = {
+    helm    = helm
+    kubectl = kubectl
+  }
+  
+  kubectl_context = var.kubectl_context
+}
+```
+
+**Deploy with:**
+```bash
+# Use current kubectl context
+terraform apply
+
+# Or override to specific context
+terraform apply -var="kubectl_context=staging-cluster"
+```
+
+**Or use your current context** by leaving `kubectl_context` empty or omitting `config_context` from providers.
+
+#### Grafana Dashboards
+
+Import these community dashboards for visualization:
+
+- [Kepler Main Dashboard](https://raw.githubusercontent.com/sustainable-computing-io/kepler-operator/main/hack/dashboard/assets/kepler/dashboard.json)
+- [Kepler Prometheus Dashboard](https://raw.githubusercontent.com/sustainable-computing-io/kepler-operator/main/hack/dashboard/assets/prometheus/dashboard.json)
+- [Ariewald Kepler Dashboard](https://raw.githubusercontent.com/ariewald/kepler-grafana-dashboard/refs/heads/main/kepler.json)
+- [Energy K8s Experiments Dashboard](https://raw.githubusercontent.com/bernardodon/energy-k8s-experiments/refs/heads/main/grafana-setup.json)
+
+### Toggle Specific Components
+
 
 ```hcl
 module "greenops" {
@@ -192,6 +283,8 @@ module "greenops" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| kubectl_config_path | Path to kubectl config file | `string` | `"~/.kube/config"` | no |
+| kubectl_context | Kubectl context to use for deployment | `string` | `""` (current context) | no |
 | observability | Observability and scaling tools (Prometheus, KEDA) | `object({...})` | `{}` | no |
 | cost_efficiency | Cost and resource efficiency tools (OpenCost) | `object({...})` | `{}` | no |
 | energy_power | Energy and power monitoring tools (Kepler, Scaphandre) | `object({...})` | `{}` | no |

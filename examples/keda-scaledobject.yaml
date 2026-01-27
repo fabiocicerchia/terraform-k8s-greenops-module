@@ -1,3 +1,10 @@
+# Example KEDA ScaledObject Configuration
+#
+# This resource defines autoscaling rules based on Prometheus metrics.
+# Apply this AFTER deploying the GreenOps module with KEDA enabled.
+#
+# Usage: kubectl apply -f keda-scaledobject.yaml
+
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
