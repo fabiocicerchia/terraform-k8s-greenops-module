@@ -6,13 +6,13 @@ terraform {
       source  = "hashicorp/helm"
       version = ">= 2.0"
     }
-    null = {
-      source  = "hashicorp/null"
-      version = ">= 3.0"
-    }
     kubectl = {
       source  = "gavinbunney/kubectl"
       version = ">= 1.14"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.0"
     }
   }
 }
@@ -27,6 +27,20 @@ provider "kubectl" {
   config_path = "~/.kube/config"
 }
 
+### CERT-MANAGER INSTALLATION ###
+
+data "http" "cert_manager" {
+  url = "https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml"
+}
+data "kubectl_file_documents" "cert_manager" {
+    content = data.http.cert_manager.response_body
+}
+resource "kubectl_manifest" "cert_manager" {
+  for_each  = data.kubectl_file_documents.cert_manager.manifests
+  yaml_body = each.value
+}
+
+#### GREENOPS MODULE DEPLOYMENT ###
 module "greenops" {
   source = "../"
 
@@ -55,8 +69,6 @@ module "greenops" {
       release_name   = "kedacore"
       namespace      = "keda"
       chart_version  = ""
-      deploy_example = true
-      manifest_path  = "keda.yaml"
       # https://github.com/kedacore/charts/blob/main/keda/values.yaml
       values = {}
     }
@@ -166,19 +178,30 @@ module "greenops" {
     }
   }
 
-  depends_on = [null_resource.deploy_cert_manager]
+  depends_on = [kubectl_manifest.cert_manager]
 }
 
-resource "null_resource" "deploy_cert_manager" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml"
-  }
+### CUSTOM SETTINGS OR ADDITIONAL RESOURCES ###
+
+data "kubectl_path_documents" "extras" {
+    pattern = "./*.yaml"
+}
+resource "kubectl_manifest" "extras" {
+  for_each  = data.kubectl_path_documents.extras.manifests
+  yaml_body = each.value
 }
 
-resource "null_resource" "deploy_demo_app" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/refs/heads/main/release/kubernetes-manifests.yaml"
-  }
+### DEMO APPLICATION DEPLOYMENT ###
+
+data "http" "demo_app" {
+  url = "https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/refs/heads/main/release/kubernetes-manifests.yaml"
+}
+data "kubectl_file_documents" "demo_app" {
+    content = data.http.demo_app.response_body
+}
+resource "kubectl_manifest" "demo_app" {
+  for_each  = data.kubectl_file_documents.demo_app.manifests
+  yaml_body = each.value
 
   depends_on = [module.greenops]
 }
